@@ -5,6 +5,7 @@ if (!$conexion) {
     die("Error de conexión: " . mysqli_connect_error());
 }
 
+
 // Inicializar variables
 $nombre = $fechanacimiento = $rfc = "";
 $mensaje = "";
