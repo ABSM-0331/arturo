@@ -1,7 +1,17 @@
 <?php
 // Conexión a la base de datos
-$conexion = mysqli_connect('localhost', 'root', '', 'autoos', 3307);
-if (!$conexion) {
+// Conexion Base de Datos
+$servidor = "server-ejemplo.mysql.database.azure.com";
+$usuario = "benjamin";
+$password = "Uyjt3095?";
+$baseDatos = "autoos";
+$ssl="DigiCertGlobalRootCA.crt.pem"; //ruta del archivo SSL
+
+$mysqli = mysqli_init();
+
+mysqli_ssl_set($mysqli, NULL, NULL, $ssl, NULL, NULL);
+
+if (!mysqli_real_connect($mysqli, $servidor, $usuario, $password, $baseDatos, 3306, NULL, MYSQLI_CLIENT_SSL)) {
     die("Error de conexión: " . mysqli_connect_error());
 }
 
@@ -26,10 +36,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertarproducto'])) {
 
     if (!empty($nombreproducto) && !empty($precio)) {
         $sqlproductos = "INSERT INTO productos (nombreproducto, precio) VALUES ('$nombreproducto', '$precio')";
-        if (mysqli_query($conexion, $sqlproductos)) {
+        if (mysqli_query($mysqli, $sqlproductos)) {
             $mensaje = "Producto agregado exitosamente.";
         } else {
-            $mensaje = "Error al agregar cliente: " . mysqli_error($conexion);
+            $mensaje = "Error al agregar cliente: " . mysqli_error($mysqli);
         }
     } else {
         $mensaje = "Por favor, complete todos los campos.";
@@ -40,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertarproducto'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['buscarproducto'])) {
     $buscar_producto = $_POST['buscar_producto'];
     $sqlproductos = "SELECT * FROM productos WHERE nombreproducto LIKE '$buscar_producto%'";
-    $resultado_producto = mysqli_query($conexion, $sqlproductos);
+    $resultado_producto = mysqli_query($mysqli, $sqlproductos);
     $producto_encontrado = mysqli_fetch_assoc($resultado_producto);
     if ($producto_encontrado) {
         $nombreproducto = $producto_encontrado['nombreproducto'];
@@ -61,10 +71,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['modificarproducto'])) 
 
     if (!empty($id_productos) && !empty($nombreproducto) && !empty($precio)) {
         $sqlproductos = "UPDATE productos SET nombreproducto='$nombreproducto', precio='$precio' WHERE idproductos=$id_productos";
-        if (mysqli_query($conexion, $sqlproductos)) {
+        if (mysqli_query($mysqli, $sqlproductos)) {
             $mensaje = "Producto modificado exitosamente.";
         } else {
-            $mensaje = "Error al modificar Producto: " . mysqli_error($conexion);
+            $mensaje = "Error al modificar Producto: " . mysqli_error($mysqli);
         }
     } else {
         $mensaje = "Por favor, complete todos los campos.";
@@ -76,11 +86,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminarproducto'])) {
     $id_productos = $_POST['id_productos'];
     if (!empty($id_productos)) {
         $sqlproductos = "DELETE FROM productos WHERE idproductos=$id_productos";
-        if (mysqli_query($conexion, $sqlproductos)) {
+        if (mysqli_query($mysqli, $sqlproductos)) {
             $mensaje = "Producto eliminado exitosamente.";
             $nombreproducto = $precio = "";
         } else {
-            $mensaje = "Error al eliminar producto: " . mysqli_error($conexion);
+            $mensaje = "Error al eliminar producto: " . mysqli_error($mysqli);
         }
     } else {
         $mensaje = "ID de producto no válido.";
@@ -97,10 +107,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertarcliente'])) {
 
     if (!empty($nombrecliente) && !empty($direccion) && !empty($telefono)) {
         $sqlcliente = "INSERT INTO cliente (nombrecliente, direccion, telefono) VALUES ('$nombrecliente', '$direccion', '$telefono')";
-        if (mysqli_query($conexion, $sqlcliente)) {
+        if (mysqli_query($mysqli, $sqlcliente)) {
             $mensaje = "Cliente agregado exitosamente.";
         } else {
-            $mensaje = "Error al agregar cliente: " . mysqli_error($conexion);
+            $mensaje = "Error al agregar cliente: " . mysqli_error($mysqli);
         }
     } else {
         $mensaje = "Por favor, complete todos los campos.";
@@ -110,7 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertarcliente'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['buscarcliente'])) {
     $buscar_cliente = $_POST['buscar_cliente'];
     $sqlcliente = "SELECT * FROM cliente WHERE nombrecliente LIKE '$buscar_cliente%'";
-    $resultado_cliente = mysqli_query($conexion, $sqlcliente);
+    $resultado_cliente = mysqli_query($mysqli, $sqlcliente);
     $cliente_encontrado = mysqli_fetch_assoc($resultado_cliente);
     if ($cliente_encontrado) {
         $nombrecliente = $cliente_encontrado['nombrecliente'];
@@ -132,10 +142,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['modificarcliente'])) {
 
     if (!empty($id_cliente) && !empty($nombrecliente) && !empty($direccion) && !empty($telefono)) {
         $sqlcliente = "UPDATE cliente SET nombrecliente='$nombrecliente', direccion='$direccion', telefono='$telefono' WHERE idcliente=$id_cliente";
-        if (mysqli_query($conexion, $sqlcliente)) {
+        if (mysqli_query($mysqli, $sqlcliente)) {
             $mensaje = "Cliente modificado exitosamente.";
         } else {
-            $mensaje = "Error al modificar cliente: " . mysqli_error($conexion);
+            $mensaje = "Error al modificar cliente: " . mysqli_error($mysqli);
         }
     } else {
         $mensaje = "Por favor, complete todos los campos.";
@@ -148,11 +158,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminarcliente'])) {
     $id_cliente = $_POST['id_cliente'];
     if (!empty($id_cliente)) {
         $sqlcliente = "DELETE FROM cliente WHERE idcliente=$id_cliente";
-        if (mysqli_query($conexion, $sqlcliente)) {
+        if (mysqli_query($mysqli, $sqlcliente)) {
             $mensaje = "Cliente eliminado exitosamente.";
             $nombrecliente = $direccion = $telefono = "";
         } else {
-            $mensaje = "Error al eliminar cliente: " . mysqli_error($conexion);
+            $mensaje = "Error al eliminar cliente: " . mysqli_error($mysqli);
         }
     } else {
         $mensaje = "ID de cliente no válido.";
@@ -167,10 +177,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertar'])) {
 
     if (!empty($nombre) && !empty($fechanacimiento) && !empty($rfc)) {
         $sql = "INSERT INTO empleados (nombre, fechanacimiento, rfc) VALUES ('$nombre', '$fechanacimiento', '$rfc')";
-        if (mysqli_query($conexion, $sql)) {
+        if (mysqli_query($mysqli, $sql)) {
             $mensaje = "Empleado agregado exitosamente.";
         } else {
-            $mensaje = "Error al agregar empleado: " . mysqli_error($conexion);
+            $mensaje = "Error al agregar empleado: " . mysqli_error($mysqli);
         }
     } else {
         $mensaje = "Por favor, complete todos los campos.";
@@ -181,7 +191,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertar'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['buscar'])) {
     $buscar_nombre = $_POST['buscar_nombre'];
     $sql = "SELECT * FROM empleados WHERE nombre LIKE '$buscar_nombre%'";
-    $resultado_buscar = mysqli_query($conexion, $sql);
+    $resultado_buscar = mysqli_query($mysqli, $sql);
     $empleado_encontrado = mysqli_fetch_assoc($resultado_buscar);
     if ($empleado_encontrado) {
         $nombre = $empleado_encontrado['nombre'];
@@ -202,10 +212,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['modificar'])) {
 
     if (!empty($id_empleado) && !empty($nombre) && !empty($fechanacimiento) && !empty($rfc)) {
         $sql = "UPDATE empleados SET nombre='$nombre', fechanacimiento='$fechanacimiento', rfc='$rfc' WHERE idempleado=$id_empleado";
-        if (mysqli_query($conexion, $sql)) {
+        if (mysqli_query($mysqli, $sql)) {
             $mensaje = "Empleado modificado exitosamente.";
         } else {
-            $mensaje = "Error al modificar empleado: " . mysqli_error($conexion);
+            $mensaje = "Error al modificar empleado: " . mysqli_error($mysqli);
         }
     } else {
         $mensaje = "Por favor, complete todos los campos.";
@@ -217,11 +227,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminar'])) {
     $id_empleado = $_POST['id_empleado'];
     if (!empty($id_empleado)) {
         $sql = "DELETE FROM empleados WHERE idempleado=$id_empleado";
-        if (mysqli_query($conexion, $sql)) {
+        if (mysqli_query($mysqli, $sql)) {
             $mensaje = "Empleado eliminado exitosamente.";
             $nombre = $fechanacimiento = $rfc = "";
         } else {
-            $mensaje = "Error al eliminar empleado: " . mysqli_error($conexion);
+            $mensaje = "Error al eliminar empleado: " . mysqli_error($mysqli);
         }
     } else {
         $mensaje = "ID de empleado no válido.";
@@ -230,22 +240,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['eliminar'])) {
 
 // Obtener todos los empleados
 $sql = "SELECT * FROM empleados";
-$resultado = mysqli_query($conexion, $sql);
+$resultado = mysqli_query($mysqli, $sql);
 
 //Obtener Administradores
 $sqladmin = "SELECT * FROM admin";
-$resultadoadmin = mysqli_query($conexion, $sqladmin);
+$resultadoadmin = mysqli_query($mysqli, $sqladmin);
 
 //Obtener Clientes
 $sqlcliente = "SELECT * FROM cliente";
-$resultadocliente = mysqli_query($conexion, $sqlcliente);
+$resultadocliente = mysqli_query($mysqli, $sqlcliente);
 
 //Obtener Productos
 $sqlproductos= "SELECT * FROM productos";
-$resultadoproductos = mysqli_query($conexion, $sqlproductos);
+$resultadoproductos = mysqli_query($mysqli, $sqlproductos);
 
 $sqlpedidos="SELECT * FROM pedidos";
-$resultadopedidos = mysqli_query($conexion, $sqlpedidos);
+$resultadopedidos = mysqli_query($mysqli, $sqlpedidos);
 
 ?>
 
@@ -652,6 +662,57 @@ tr:last-child td {
     flex: 1;
     min-width: 200px;
 }
+
+.posicion {
+    position: absolute;
+    top: -5px;   /* distancia desde la parte superior */
+    left: 200px;  /* distancia desde la izquierda */
+    width: 150px;
+  }
+  .posicionn {
+    position: absolute;
+    top: -5px;   /* distancia desde la parte superior */
+    left: 1700px;  /* distancia desde la izquierda */
+    width: 150px;
+  }
+  .posicioncliente {
+    position: absolute;
+    top: -5px;   /* distancia desde la parte superior */
+    left: 200px;  /* distancia desde la izquierda */
+    width: 150px;
+  }
+  .posicionclientee {
+    position: absolute;
+    top: -5px;   /* distancia desde la parte superior */
+    left: 1700px;  /* distancia desde la izquierda */
+    width: 150px;
+  }
+
+  .posicionproducto {
+    position: absolute;
+    top: -5px;   /* distancia desde la parte superior */
+    left: 200px;  /* distancia desde la izquierda */
+    width: 150px;
+  }
+  .posicionproductoo {
+    position: absolute;
+    top: -5px;   /* distancia desde la parte superior */
+    left: 1700px;  /* distancia desde la izquierda */
+    width: 150px;
+  }
+
+  .posicionpedido {
+    position: absolute;
+    top: -5px;   /* distancia desde la parte superior */
+    left: 200px;  /* distancia desde la izquierda */
+    width: 150px;
+  }
+  .posicionpedidoo {
+    position: absolute;
+    top: -5px;   /* distancia desde la parte superior */
+    left: 1700px;  /* distancia desde la izquierda */
+    width: 150px;
+  }
     </style>
     <script>
         function mostrarSeccion(seccionId) {
@@ -712,6 +773,9 @@ tr:last-child td {
 <!-- Pedidos -->
 <div id="pedidos" class="seccion">
     <h1>Pedidos</h1>
+
+        <img src="pedido.png" alt="Imagen absoluta" class="posicionpedido">
+        <img src="pedido.png" alt="Imagen absoluta" class="posicionpedidoo">
    
 <table>
         <tr>
@@ -739,8 +803,9 @@ tr:last-child td {
 <!-- Productos -->
 <div id="productos" class="seccion">
     <h1>Productos</h1>
-  
-
+ 
+<img src="producto.png" alt="Imagen absoluta" class="posicionproducto">
+        <img src="producto.png" alt="Imagen absoluta" class="posicionproductoo">
  <form method="POST">
         <input type="text" name="buscar_producto" placeholder="Buscar por nombre" required>
         <button type="submit" name="buscarproducto">Buscar</button>
@@ -800,6 +865,9 @@ tr:last-child td {
 
 <div id="empleados" class="seccion">
     <h1>Gestión de Empleados</h1>
+
+    <img src="icono.png" alt="Imagen absoluta" class="posicion">
+        <img src="icono.png" alt="Imagen absoluta" class="posicionn">
 
     <?php if (!empty($mensaje)) echo "<p class='mensaje'>$mensaje</p>"; ?>
 
@@ -867,6 +935,8 @@ tr:last-child td {
 <div id="clientes" class="seccion">
     <h1>Clientes</h1>
     
+     <img src="cliente.png" alt="Imagen absoluta" class="posicioncliente">
+        <img src="cliente.png" alt="Imagen absoluta" class="posicionclientee">
 
      <form method="POST">
         <input type="text" name="buscar_cliente" placeholder="Buscar por nombre" required>
