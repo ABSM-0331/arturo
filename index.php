@@ -26,7 +26,8 @@ $nombreadmin = $clave = "";
 $nombrecliente = $direccion = $telefono = "";
 
 //Variable de Producto
-$nombreproducto = $precio = "";
+$nombreproducto = "";
+$precio = 0.0;
 
 // Insertar nuevo producto
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertarproducto'])) {
